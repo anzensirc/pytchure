@@ -59,5 +59,5 @@ def play_video_in_terminal_ascii(video_path, fps=15):
         cap.release()
 
 # Ganti path sesuai video kamu
-video_path = "video.mp4"
+video_path = "namafile.mp4"
 play_video_in_terminal_ascii(video_path)
