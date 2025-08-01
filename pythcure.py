@@ -134,3 +134,4 @@ if __name__ == "__main__":
         loop=args.loop,
         use_color=args.color
     )
+
