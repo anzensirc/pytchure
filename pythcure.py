@@ -3,32 +3,38 @@ import os
 import time
 import shutil
 
-def play_video_in_terminal(video_path, threshold=127, fps=15):
+# Semakin kiri = gelap, kanan = terang
+ASCII_CHARS = "@%#*+=-:. "
+
+def map_pixel_to_ascii(pixel_value):
+    """Map pixel value (0–255) ke karakter ASCII"""
+    index = int((pixel_value / 255) * (len(ASCII_CHARS) - 1))
+    return ASCII_CHARS[index]
+
+def play_video_in_terminal_ascii(video_path, fps=15):
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
         print("Gagal membuka video.")
         return
 
-    # Ambil ukuran terminal
-    terminal_size = shutil.get_terminal_size((80, 24))
-    term_width = terminal_size.columns
-    term_height = terminal_size.lines - 2  # sisakan 2 baris
+    # Ukuran terminal
+    term_size = shutil.get_terminal_size((80, 24))
+    term_width = term_size.columns
+    term_height = term_size.lines - 2  # sisakan baris bawah
 
-    # Loop untuk membaca dan menampilkan frame
     try:
         while True:
             ret, frame = cap.read()
             if not ret:
-                break  # Video selesai
+                break
 
-            # Ubah ke grayscale
+            # Konversi ke grayscale
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            # Hitung rasio scaling berdasarkan ukuran terminal
-            frame_height, frame_width = gray.shape
-            aspect_ratio = frame_height / frame_width
-
+            # Hitung rasio dan scaling
+            h, w = gray.shape
+            aspect_ratio = h / w
             target_width = term_width
             target_height = int(aspect_ratio * target_width * 0.55)
 
@@ -36,28 +42,22 @@ def play_video_in_terminal(video_path, threshold=127, fps=15):
                 target_height = term_height
                 target_width = int(target_height / (aspect_ratio * 0.55))
 
-            # Resize frame
             resized = cv2.resize(gray, (target_width, target_height))
 
-            # Konversi ke hitam-putih
-            _, binary = cv2.threshold(resized, threshold, 255, cv2.THRESH_BINARY)
-
             # Bersihkan terminal
-            os.system('cls' if os.name == 'nt' else 'clear')
+            os.system("cls" if os.name == "nt" else "clear")
 
-            # Tampilkan karakter ke terminal
-            for row in binary:
-                line = ''.join(['█' if pixel == 0 else ' ' for pixel in row])
+            # Tampilkan tiap baris sebagai ASCII
+            for row in resized:
+                line = ''.join(map_pixel_to_ascii(pixel) for pixel in row)
                 print(line)
 
-            # Delay antar frame
             time.sleep(1 / fps)
-
     except KeyboardInterrupt:
         print("\nDihentikan oleh pengguna.")
     finally:
         cap.release()
 
-# Ganti dengan nama file video kamu
+# Ganti path sesuai video kamu
 video_path = "video.mp4"
-play_video_in_terminal(video_path)
+play_video_in_terminal_ascii(video_path)
