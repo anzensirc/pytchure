@@ -60,4 +60,6 @@ def play_video_in_terminal_ascii(video_path, fps=15):
 
 # Ganti path sesuai video kamu
 video_path = "video.mp4"
+if not os.path.exists(video_path):
+    print(f"File video '{video_path}' tidak ditemukan.")
 play_video_in_terminal_ascii(video_path)
