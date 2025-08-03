@@ -1,40 +1,12 @@
-#include <iostream>
+#include <windows.h>
 #include <sqlite3.h>
+#include <string>
 
-int createDatabase() {
-    sqlite3 *db;
-    int exit = sqlite3_open("users.db", &db);
+#define ID_EDIT_USERNAME 101
+#define ID_EDIT_PASSWORD 102
+#define ID_BUTTON_LOGIN  103
 
-    std::string sql = "CREATE TABLE IF NOT EXISTS USERS("
-                      "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-                      "USERNAME TEXT NOT NULL, "
-                      "PASSWORD TEXT NOT NULL);";
-
-    char* errorMessage;
-    exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &errorMessage);
-
-    if (exit != SQLITE_OK) {
-        std::cerr << "Error Create Table: " << errorMessage << std::endl;
-        sqlite3_free(errorMessage);
-    } else {
-        std::cout << "Table created successfully\n";
-    }
-
-    std::string insert_sql = "INSERT INTO USERS (USERNAME, PASSWORD) "
-                             "SELECT 'admin', '1234' "
-                             "WHERE NOT EXISTS (SELECT 1 FROM USERS WHERE USERNAME='admin');";
-
-    exit = sqlite3_exec(db, insert_sql.c_str(), NULL, 0, &errorMessage);
-    if (exit != SQLITE_OK) {
-        std::cerr << "Insert error: " << errorMessage << std::endl;
-        sqlite3_free(errorMessage);
-    } else {
-        std::cout << "Dummy user added\n";
-    }
-
-    sqlite3_close(db);
-    return 0;
-}
+HWND hUsername, hPassword, hOutput;
 
 bool checkLogin(const std::string& username, const std::string& password) {
     sqlite3* db;
@@ -42,10 +14,7 @@ bool checkLogin(const std::string& username, const std::string& password) {
     bool success = false;
 
     int rc = sqlite3_open("users.db", &db);
-    if (rc != SQLITE_OK) {
-        std::cerr << "Can't open DB\n";
-        return false;
-    }
+    if (rc != SQLITE_OK) return false;
 
     std::string sql = "SELECT * FROM USERS WHERE USERNAME=? AND PASSWORD=?";
     rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0);
@@ -64,20 +33,69 @@ bool checkLogin(const std::string& username, const std::string& password) {
     return success;
 }
 
-int main() {
-    createDatabase();
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg) {
+        case WM_CREATE:
+            CreateWindow("STATIC", "Username:", WS_VISIBLE | WS_CHILD,
+                         20, 20, 80, 20, hwnd, NULL, NULL, NULL);
+            hUsername = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                     100, 20, 150, 20, hwnd, (HMENU)ID_EDIT_USERNAME, NULL, NULL);
 
-    std::string user, pass;
-    std::cout << "Username: ";
-    std::cin >> user;
-    std::cout << "Password: ";
-    std::cin >> pass;
+            CreateWindow("STATIC", "Password:", WS_VISIBLE | WS_CHILD,
+                         20, 60, 80, 20, hwnd, NULL, NULL, NULL);
+            hPassword = CreateWindow("EDIT", "", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_PASSWORD,
+                                     100, 60, 150, 20, hwnd, (HMENU)ID_EDIT_PASSWORD, NULL, NULL);
 
-    if (checkLogin(user, pass)) {
-        std::cout << "Login berhasil!\n";
-    } else {
-        std::cout << "Login gagal. Username atau password salah.\n";
+            CreateWindow("BUTTON", "Login", WS_VISIBLE | WS_CHILD,
+                         100, 100, 150, 25, hwnd, (HMENU)ID_BUTTON_LOGIN, NULL, NULL);
+
+            hOutput = CreateWindow("STATIC", "", WS_VISIBLE | WS_CHILD,
+                                   20, 140, 250, 20, hwnd, NULL, NULL, NULL);
+            break;
+
+        case WM_COMMAND:
+            if (LOWORD(wParam) == ID_BUTTON_LOGIN) {
+                char username[100], password[100];
+                GetWindowText(hUsername, username, 100);
+                GetWindowText(hPassword, password, 100);
+
+                if (checkLogin(username, password)) {
+                    SetWindowText(hOutput, "✅ Login berhasil!");
+                } else {
+                    SetWindowText(hOutput, "❌ Login gagal.");
+                }
+            }
+            break;
+
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+
+        default:
+            return DefWindowProc(hwnd, msg, wParam, lParam);
     }
+    return 0;
+}
 
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
+    WNDCLASS wc = {};
+    wc.lpszClassName = "LoginWindowClass";
+    wc.hInstance = hInst;
+    wc.lpfnWndProc = WindowProc;
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+    RegisterClass(&wc);
+
+    HWND hwnd = CreateWindow("LoginWindowClass", "Login GUI SQLite",
+                             WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
+                             100, 100, 320, 240,
+                             NULL, NULL, hInst, NULL);
+
+    ShowWindow(hwnd, nCmdShow);
+
+    MSG msg = {};
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
     return 0;
 }
