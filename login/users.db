@@ -1,9 +1,12 @@
+// main.cpp
 #include <iostream>
 #include <sqlite3.h>
 
 int createDatabase() {
     sqlite3 *db;
-    int exit = sqlite3_open("users.db", &db);
+    int exit = 0;
+
+    exit = sqlite3_open("users.db", &db);
 
     std::string sql = "CREATE TABLE IF NOT EXISTS USERS("
                       "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -20,6 +23,7 @@ int createDatabase() {
         std::cout << "Table created successfully\n";
     }
 
+    // Insert dummy user
     std::string insert_sql = "INSERT INTO USERS (USERNAME, PASSWORD) "
                              "SELECT 'admin', '1234' "
                              "WHERE NOT EXISTS (SELECT 1 FROM USERS WHERE USERNAME='admin');";
