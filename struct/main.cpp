@@ -12,6 +12,7 @@ struct Struk {
     double harga;
 };
 
+// Membaca semua data dari struk.txt
 std::vector<Struk> bacaData() {
     std::ifstream file("struk.txt");
     std::vector<Struk> data;
@@ -22,6 +23,7 @@ std::vector<Struk> bacaData() {
     return data;
 }
 
+// Menyimpan semua data ke struk.txt
 void simpanData(const std::vector<Struk>& data) {
     std::ofstream file("struk.txt");
     for (const auto& s : data) {
@@ -30,6 +32,7 @@ void simpanData(const std::vector<Struk>& data) {
     }
 }
 
+// Menambahkan struk baru
 void tambahStruk() {
     Struk s;
     std::cout << "ID: "; std::cin >> s.id;
@@ -44,6 +47,7 @@ void tambahStruk() {
     std::cout << "Struk berhasil ditambahkan!\n";
 }
 
+// Menampilkan semua struk
 void tampilkanStruk() {
     std::vector<Struk> data = bacaData();
     std::cout << std::left << std::setw(5) << "ID" << std::setw(12) << "Tanggal"
@@ -58,6 +62,7 @@ void tampilkanStruk() {
     }
 }
 
+// Mengubah struk berdasarkan ID
 void ubahStruk() {
     int id;
     std::cout << "Masukkan ID struk yang ingin diubah: ";
@@ -83,6 +88,7 @@ void ubahStruk() {
     }
 }
 
+// Menghapus struk berdasarkan ID
 void hapusStruk() {
     int id;
     std::cout << "Masukkan ID struk yang ingin dihapus: ";
@@ -108,6 +114,55 @@ void hapusStruk() {
     }
 }
 
+// Mengekspor ke TXT
+void exportTXT() {
+    std::ifstream source("struk.txt");
+    std::ofstream dest("export.txt");
+
+    if (!source || !dest) {
+        std::cout << "Gagal membuka file.\n";
+        return;
+    }
+
+    dest << "=== EXPORT DATA STRUK ===\n";
+    dest << "ID\tTanggal\t\tBarang\tJumlah\tHarga\n";
+
+    Struk s;
+    while (source >> s.id >> s.tanggal >> s.namaBarang >> s.jumlah >> s.harga) {
+        dest << s.id << "\t" << s.tanggal << "\t" << s.namaBarang
+             << "\t" << s.jumlah << "\t" << s.harga << "\n";
+    }
+
+    source.close();
+    dest.close();
+    std::cout << "Data berhasil diexport ke export.txt\n";
+}
+
+// Mengekspor ke PDF (format teks biasa)
+void exportPDF() {
+    std::ifstream source("struk.txt");
+    std::ofstream dest("export.pdf");
+
+    if (!source || !dest) {
+        std::cout << "Gagal membuka file.\n";
+        return;
+    }
+
+    dest << "=== EXPORT DATA STRUK (PDF) ===\n";
+    dest << "ID\tTanggal\t\tBarang\tJumlah\tHarga\n";
+
+    Struk s;
+    while (source >> s.id >> s.tanggal >> s.namaBarang >> s.jumlah >> s.harga) {
+        dest << s.id << "\t" << s.tanggal << "\t" << s.namaBarang
+             << "\t" << s.jumlah << "\t" << s.harga << "\n";
+    }
+
+    source.close();
+    dest.close();
+    std::cout << "Data berhasil diexport ke export.pdf (teks biasa)\n";
+}
+
+// Fungsi utama
 int main() {
     int pilihan;
     do {
@@ -117,6 +172,8 @@ int main() {
         std::cout << "3. Ubah Struk\n";
         std::cout << "4. Hapus Struk\n";
         std::cout << "5. Keluar\n";
+        std::cout << "6. Export ke TXT\n";
+        std::cout << "7. Export ke PDF (teks biasa)\n";
         std::cout << "Pilih menu: ";
         std::cin >> pilihan;
 
@@ -126,6 +183,8 @@ int main() {
             case 3: ubahStruk(); break;
             case 4: hapusStruk(); break;
             case 5: std::cout << "Keluar...\n"; break;
+            case 6: exportTXT(); break;
+            case 7: exportPDF(); break;
             default: std::cout << "Pilihan tidak valid.\n";
         }
     } while (pilihan != 5);
