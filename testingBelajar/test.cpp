@@ -3,15 +3,27 @@
 #include <windows.h>
 using namespace std;
 
+// Variabel global
 bool gameOver;
 const int width = 20;
 const int height = 17;
 int x, y, fruitX, fruitY, score;
 int tailX[100], tailY[100];
 int nTail;
+
 enum Direction { STOP = 0, LEFT, RIGHT, UP, DOWN };
 Direction dir;
 
+// Menyembunyikan kursor agar tidak mengganggu tampilan
+void hideCursor() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(hOut, &cursorInfo);
+    cursorInfo.bVisible = false;
+    SetConsoleCursorInfo(hOut, &cursorInfo);
+}
+
+// Mengatur posisi awal
 void Setup() {
     gameOver = false;
     dir = STOP;
@@ -20,10 +32,18 @@ void Setup() {
     fruitX = rand() % width;
     fruitY = rand() % height;
     score = 0;
+    nTail = 0;
 }
 
+// Menggambar ulang layar tanpa cls (menghindari flicker)
 void Draw() {
-    system("cls"); // clear console
+    HANDLE hOut;
+    COORD Position;
+
+    hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    Position.X = 0;
+    Position.Y = 0;
+    SetConsoleCursorPosition(hOut, Position);
 
     for (int i = 0; i < width + 2; i++)
         cout << "#";
@@ -35,9 +55,9 @@ void Draw() {
                 cout << "#";
 
             if (i == y && j == x)
-                cout << "O"; // kepala snake
+                cout << "O"; // kepala
             else if (i == fruitY && j == fruitX)
-                cout << "F"; // makanan
+                cout << "F"; // buah
             else {
                 bool print = false;
                 for (int k = 0; k < nTail; k++) {
@@ -62,20 +82,21 @@ void Draw() {
     cout << "Score: " << score << endl;
 }
 
+// Input keyboard (tanpa enter)
 void Input() {
     if (_kbhit()) {
         switch (_getch()) {
         case 'a':
-            dir = LEFT;
+            if (dir != RIGHT) dir = LEFT;
             break;
         case 'd':
-            dir = RIGHT;
+            if (dir != LEFT) dir = RIGHT;
             break;
         case 'w':
-            dir = UP;
+            if (dir != DOWN) dir = UP;
             break;
         case 's':
-            dir = DOWN;
+            if (dir != UP) dir = DOWN;
             break;
         case 'x':
             gameOver = true;
@@ -84,6 +105,7 @@ void Input() {
     }
 }
 
+// Logika permainan
 void Logic() {
     int prevX = tailX[0];
     int prevY = tailY[0];
@@ -117,16 +139,16 @@ void Logic() {
         break;
     }
 
-    // tabrak dinding
+    // Tabrak dinding
     if (x >= width || x < 0 || y >= height || y < 0)
         gameOver = true;
 
-    // tabrak badan sendiri
+    // Tabrak tubuh sendiri
     for (int i = 0; i < nTail; i++)
         if (tailX[i] == x && tailY[i] == y)
             gameOver = true;
 
-    // makan buah
+    // Makan buah
     if (x == fruitX && y == fruitY) {
         score += 10;
         fruitX = rand() % width;
@@ -135,16 +157,22 @@ void Logic() {
     }
 }
 
+// Main loop
 int main() {
     Setup();
+    hideCursor();
+
     while (!gameOver) {
         Draw();
         Input();
         Logic();
-        Sleep(100); // delay (ms)
+        Sleep(100); // delay 100 ms
     }
 
-    cout << "Game Over! Final Score: " << score << endl;
+    // Game over
+    system("cls");
+    cout << "Game Over!" << endl;
+    cout << "Final Score: " << score << endl;
     system("pause");
     return 0;
 }
