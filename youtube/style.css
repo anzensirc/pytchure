@@ -1,0 +1,152 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #0f0f0f;
+    color: white;
+    display: flex;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #202020;
+    padding: 0 16px;
+    z-index: 1000;
+}
+
+.header .left-section, .right-section {
+    display: flex;
+    align-items: center;
+}
+
+.header .logo {
+    height: 20px;
+    margin-left: 10px;
+}
+
+.header .icon, .header .profile {
+    height: 32px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+.search-bar {
+    display: flex;
+    flex: 1;
+    max-width: 600px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 6px;
+    background-color: #121212;
+    border: 1px solid #303030;
+    color: white;
+}
+
+.search-button, .mic-button {
+    background-color: #303030;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+}
+
+.sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 240px;
+    height: calc(100% - 56px);
+    background-color: #202020;
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    background-color: #383838;
+}
+
+.sidebar .sub-header {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.content {
+    margin-left: 240px;
+    margin-top: 56px;
+    padding: 20px;
+    flex: 1;
+}
+
+.categories {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.categories button {
+    background-color: #303030;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+}
+
+.categories button:hover {
+    background-color: #4d4d4d;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.video-card {
+    background-color: transparent;
+}
+
+.thumbnail {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.channel, .views {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.shorts-title {
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+.shorts-grid {
+    display: flex;
+    gap: 10px;
+}
+
+.short-card {
+    background-color: transparent;
+    width: 150px;
+}
+
+.short-card img {
+    width: 100%;
+    border-radius: 8px;
+}
